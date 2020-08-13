@@ -16,6 +16,4 @@ class ZhipinspiderItem(scrapy.Item):
     company_name = scrapy.Field()  # 公司名称
     company_type = scrapy.Field()  # 公司所在行业
     company_scale = scrapy.Field()  # 公司规模
-    company_finance = scrapy.Field()  # 融资情况
-
-
+    company_finace = scrapy.Field()  # 融资情况

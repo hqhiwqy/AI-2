@@ -13,11 +13,9 @@ class ZhipinspiderPipeline:
 
     def process_item(self, item, spider):
 
-        # return item
+        # print(type(item))
 
-        # print("岗位名称：{}".format(item['name']))
-
-        # 链接MongoDB数据库
+        # 连接MongoDB数据库
         client = pymongo.MongoClient("127.0.0.1", 27017)
 
         # 指定数据库
@@ -28,3 +26,4 @@ class ZhipinspiderPipeline:
 
         # 插入文档到集合
         collection.insert_one(dict(item))
+
