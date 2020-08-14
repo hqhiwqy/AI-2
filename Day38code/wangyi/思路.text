@@ -1,0 +1,152 @@
+Scrapy中使用Selenium的基本流程
+1、在爬虫文件的构造方法中创建一个浏览器对象
+
+2、重写爬虫文件中的close方法，主要是执行浏览器对象关闭的操作
+
+3、在下载中间件获取浏览器对象并进行调用
+
+4、将下载中间件通过浏览器对象并调用之后的结果重新构造一个新的返回对象
+
+
+实现步骤
+一、安装 scrapy、selenium、pymongo以及Chrome headless插件
+pip install scrapy selenium pymongo -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+二、创建一个爬虫项目
+scrapy startproject wangyi
+
+三、创建一个爬虫news爬取国内、国际等分类下的所有新闻（标题、内容）
+cd wangyi
+scrapy genspider news news.163.com
+
+四、编写items.py文件，明确爬虫目标
+title = scrapy.Field()
+content = scrapy.Field()
+
+五、编写news.py爬虫文件
+1、实例化浏览器对象
+2、根据请求初始URL获取5大分类（国内、国际、军事、航空、无人机）的url，然后再根据分类url进行Request请求，从而获取到对应url下的新闻数据（主要得到新闻标题）。然后再根据新闻详情页url进行Request请求获取到新闻内容。
+3、爬虫结束后，关闭浏览器对象
+import scrapy
+from selenium import webdriver
+from wangyi.items import WangyiItem
+
+
+class NewsSpider(scrapy.Spider):
+    name = 'news'
+    # allowed_domains = ['news.163.com']
+    start_urls = ['http://news.163.com/']
+
+    # chromedriver 驱动文件，这里需要换成你自己电脑里的驱动文件路径
+    chrome_driver = "/Users/stark/Desktop/chromedriver"
+
+    urls = []  # 定义需要爬取的分类url
+
+    # 实例化一个浏览器对象
+    brower = webdriver.Chrome(executable_path=chrome_driver)
+
+    def parse(self, response):
+        li_list = response.xpath('//div[@class="ns_area list"]/ul/li')
+        for index in [3, 4, 6, 7, 8]:
+            li = li_list[index]
+            new_url = li.xpath('./a/@href').extract_first()
+            self.urls.append(new_url)
+            # 根据这5大类对应的url进行发送请求
+            yield scrapy.Request(url=new_url, callback=self.parse_news)
+
+    # 用来解析每一个分类对应的新闻数据（目前只能解析新闻标题）
+    def parse_news(self, response):
+        div_list = response.xpath('//div[@class="ndi_main"]/div')
+        for div in div_list:
+            title = div.xpath('./div/div[1]/h3/a/text()').extract_first()
+            detail_url = div.xpath('./div/div[1]/h3/a/@href').extract_first()
+
+            item = WangyiItem()
+            item['title'] = title
+            # 根据新闻详情页url进行发送请求
+            yield scrapy.Request(url=detail_url, callback=self.parse_news_detail, meta={"data": item})
+
+    def parse_news_detail(self, response):
+        item = response.meta['data']
+
+        # //text() 递归取某一个元素下所有的元素的文本内容
+        content = response.xpath('//div[@class="post_body"]//text()').extract()
+        item['content'] = ''.join(content)
+
+        yield item
+
+    def close(self, spider):
+        print("---------爬虫整体结束---------")
+        self.brower.quit()
+
+六、编写middlewares.py文件（重点、关键点）
+import scrapy
+import time
+
+
+# 自定义爬虫news的下载中间件
+class NewsDownloaderMiddleware:
+
+    def process_response(self, request, response, spider):
+        # 判断哪些响应对象是属于5大分类的请求返回的，如果是就对响应对象进行处理
+        if response.url in spider.urls:
+            brower = spider.brower
+            brower.get(response.url)
+
+            # 鼠标滚动到底部
+            brower.execute_script('window.scrollTo(0,document.body.scrollHeight)')
+            time.sleep(2)
+            brower.execute_script('window.scrollTo(0,document.body.scrollHeight)')
+            time.sleep(2)
+            brower.execute_script('window.scrollTo(0,document.body.scrollHeight)')
+            time.sleep(2)
+
+            # 获取携带了新闻数据的页面的html源码
+            page_html = brower.page_source
+
+            # 实例化一个新的响应对象
+            new_response = scrapy.http.HtmlResponse(url=response.url, body=page_html, encoding='utf-8', request=request)
+            return new_response
+        else:
+            return response
+
+七、编写pipelines.py文件
+import pymongo
+
+
+class WangyiPipeline:
+    def process_item(self, item, spider):
+
+        # 连接到MongoDB数据库服务器
+        client = pymongo.MongoClient('127.0.0.1', 27017)
+
+        # 指定数据库
+        db = client.wangyi
+
+        # 指定集合
+        news_collection = db.news
+
+        # 插入文档
+        news_collection.insert_one(dict(item))
+
+八、编写settings.py文件
+BOT_NAME = 'wangyi'
+
+SPIDER_MODULES = ['wangyi.spiders']
+
+NEWSPIDER_MODULE = 'wangyi.spiders'
+
+ROBOTSTXT_OBEY = False
+
+USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36"
+
+DOWNLOADER_MIDDLEWARES = {
+   'wangyi.middlewares.NewsDownloaderMiddleware': 543
+}
+
+ITEM_PIPELINES = {
+   'wangyi.pipelines.WangyiPipeline': 300,
+}
+
+九、执行爬虫news
+scrapy crawl news
