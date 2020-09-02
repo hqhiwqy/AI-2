@@ -1,6 +1,6 @@
 from flask import Flask
 from flask import render_template
-import default_config
+from test1 import default_config
 
 app = Flask(__name__)
 app.config.from_object(default_config)

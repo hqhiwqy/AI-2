@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>首页</title>
+</head>
+<body>
+    {% if account %}
+    欢迎回来 {{ account }}, <a href="/logout">退出</a>
+    {% else %}
+    欢迎光临，<a href="/login">登录</a>
+    {% endif %}
+</body>
+</html>
