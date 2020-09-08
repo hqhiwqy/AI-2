@@ -5,10 +5,24 @@
     <title>Title</title>
 </head>
 <body>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class=flashes>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
     <form action="" method="post" enctype="multipart/form-data">
         上传头像：<input type="file" name="headpic">
         <input type="submit" value="上传">
     </form>
+
+    <div>
+        <img src="{{ url }}" alt="">
+    </div>
 
 
 </body>
