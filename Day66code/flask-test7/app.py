@@ -1,12 +1,13 @@
 import os
 from flask import Flask, request, url_for, send_from_directory, render_template, flash, session
 from werkzeug.utils import secure_filename
+# from pypinyin import lazy_pinyin
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = os.path.join('./uploads_pic')  # 返回指定文件夹
-app.config['UPLOAD_FOLDER'] = os.getcwd()  # 返回当前目录
+# app.config['UPLOAD_FOLDER'] = os.getcwd()  # 返回当前目录
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 app.secret_key = os.urandom(24)
@@ -52,13 +53,14 @@ def upload_file():
         if file and allowed_file(file.filename):
             # 导入 Werkzeug 提供的 secure_filename() 函数来检查文件名
             filename = secure_filename(file.filename)
-
+            # filename = secure_filename(''.join(lazy_pinyin(file.filename)))
+            print(filename)
             # 保存上传的文件
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
 
             # 获取上次文件的 Url
             file_url = url_for('uploaded_file', filename=file.filename)
-
+            print(filename)
             # 根据获取的文件 Url 显示图片
             return render_template('upload.html', url=file_url)
         else:

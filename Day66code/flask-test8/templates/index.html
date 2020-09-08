@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>首页</title>
+</head>
+<body>
+    {% if 'isLogged' in session and session['isLogged'] == 1%}
+    <p>欢迎回来，{{ session['account'] }}<a href="logout">退出</a></p>
+    {% else %}
+    <p>欢迎 请<a href="login">登录</a></p>
+    {% endif %}
+
+</body>
+</html>
