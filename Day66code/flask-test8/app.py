@@ -3,19 +3,15 @@ from flask import Flask, render_template, request, session, flash, redirect, url
 from flask_sqlalchemy import SQLAlchemy
 from datetime import timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_moment import Moment
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:hao7883370@192.168.81.129:3306/test'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# app.config['PERMANENT_SESSION_LIFETIME'] = 7*24*60*60
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
 # PERMANENT_SESSION_LIFETIME = timedelta(days=4)
-app.permanent_session_lifetime = timedelta(seconds=7*24*60*60)
+# app.permanent_session_lifetime = timedelta(seconds=7*24*60*60)
 db = SQLAlchemy(app)
-moment = Moment(app)
-
-
 
 
 # 创建 User 模型

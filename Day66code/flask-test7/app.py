@@ -2,6 +2,7 @@ import os
 from flask import Flask, request, url_for, send_from_directory, render_template, flash, session
 from werkzeug.utils import secure_filename
 # from pypinyin import lazy_pinyin
+import uuid
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
@@ -55,12 +56,14 @@ def upload_file():
             filename = secure_filename(file.filename)
             # filename = secure_filename(''.join(lazy_pinyin(file.filename)))
             print(filename)
+            # 生成不重复的上传文件
+            new_filename = uuid.uuid4().hex + '.' + filename.rsplit('.', 1)[1]
             # 保存上传的文件
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], new_filename))
 
             # 获取上次文件的 Url
             file_url = url_for('uploaded_file', filename=file.filename)
-            print(filename)
+            # print(filename)
             # 根据获取的文件 Url 显示图片
             return render_template('upload.html', url=file_url)
         else:
@@ -71,3 +74,5 @@ def upload_file():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+# https://blog.csdn.net/qq_36390239/article/details/98847888 解决文件名不是中文
