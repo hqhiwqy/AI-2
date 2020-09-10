@@ -1,4 +1,6 @@
 # 测试开发环境
+import datetime
+
 DEBUG = True
 
 DIALECT = 'mysql'  # 数据库类型
@@ -24,3 +26,5 @@ SQLALCHEMY_DATABASE_URI = "{}+{}://{}:{}@{}:{}/{}?charset=utf8mb4".format(DIALEC
                                                                           DATABASE)
 
 SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+SEND_FILE_MAX_AGE_DEFAULT = datetime.timedelta(seconds=1)
