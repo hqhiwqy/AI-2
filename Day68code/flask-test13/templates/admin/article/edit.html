@@ -3,7 +3,7 @@
 {% block title %}编辑新闻-新闻管理系统{% endblock %}
 
 {% block content %}
-    <form class="form-horizontal" role="form" method='POST' novalidate>
+    <form class="form-horizontal" role="form" method='POST' novalidate enctype="multipart/form-data">
       <div class="form-group {% if form.title.errors %} has-error {% endif %}">
           <label class="col-sm-2 control-label">{{ form.title.label }}</label>
           <div class="col-sm-10">

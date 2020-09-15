@@ -10,7 +10,7 @@
 {% for item in news %}
 <div class="list-news">
     <div class="img-content">
-        <img src="{{ item.img_url }}" alt="图片">
+        <img src="{{ url_for('static', filename='img/') }}{{ item.img_url }}" alt="图片">
     </div>
     <div class="right-content">
         <p><a href="{{ url_for('.detail', pk=item.id) }}" >{{ item.title }}</a></p>

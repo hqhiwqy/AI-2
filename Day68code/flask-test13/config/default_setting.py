@@ -9,9 +9,9 @@ DRIVER = 'pymysql'  # 数据库驱动
 
 USERNAME = 'root'  # 用户名
 
-PASSWORD = 'hao7883370'  # 密码
+PASSWORD = ''  # 密码
 
-HOST = '192.168.81.130'  # 服务器
+HOST = '39.105.163.44'  # 服务器
 
 PORT = 3306  # 端口
 
@@ -30,3 +30,4 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 SEND_FILE_MAX_AGE_DEFAULT = datetime.timedelta(seconds=1)
 
 PER_PAGE = 5
+

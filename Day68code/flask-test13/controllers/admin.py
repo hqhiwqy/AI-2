@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, session, redirect, url_for, flash
 from werkzeug.security import check_password_hash, generate_password_hash
-from common.forms import UserForm, ArticleForm
+from common.forms import UserForm, ArticleForm, ChangeFrom
 # 引入functools.wraps装饰器
 from functools import wraps
 from models.Article import Article
@@ -8,7 +8,10 @@ from models.User import User
 from app import db
 from config.default_setting import PER_PAGE
 from datetime import datetime
+from werkzeug.utils import secure_filename
+from pypinyin import lazy_pinyin
 
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
 admin_route = Blueprint('admin', __name__)
 
@@ -22,6 +25,7 @@ def admin_login_require(f):
             # 如果session中没有isLogged的键名，则重定向到登录页
             return redirect(url_for('.login'))
         return f(*args, **kwargs)
+
     return wrapper
 
 
@@ -59,6 +63,29 @@ def login():
             flash("用户名或密码错误！")
 
     return render_template('/admin/login.html')
+
+
+# 修改密码
+@admin_route.route('/passwd_change', methods=['POST', 'GET'])
+def passwd_change():
+    user = User.query.filter_by(id=session['userid']).first()
+    if user is None:
+        return redirect(url_for('.index'))
+
+    form = ChangeFrom(obj=user)
+    if form.validate_on_submit():
+        if user.username == form.username.data and check_password_hash(user.passwd, form.password.data):
+            try:
+                user.passwd = generate_password_hash(form.password.data)
+                db.session.add(user)
+                db.session.commit()
+                flash("修改密码成功！")
+                return redirect(url_for('.index'))
+            except:
+                flash("修改密码失败！", category="error")
+        else:
+            flash("旧密码输入错误！", category="error")
+    return render_template("/admin/passwd_change.html", form=form)
 
 
 # 退出
@@ -172,7 +199,6 @@ def user_delete(pk):
 @admin_route.route('/article/<int:page>')
 @admin_login_require
 def article_index(page=None):
-
     # 带分页查询
     if page is None:
         page = 1
@@ -182,9 +208,9 @@ def article_index(page=None):
 
     # 按搜索条件来进行查询
     if keyword:
-        articles = Article.query\
-            .filter(Article.title.contains(keyword))\
-            .order_by(Article.id)\
+        articles = Article.query \
+            .filter(Article.title.contains(keyword)) \
+            .order_by(Article.id) \
             .paginate(page=page, per_page=PER_PAGE)
 
         condition = "?search=" + keyword
@@ -201,16 +227,21 @@ def article_index(page=None):
 @admin_login_require
 def article_add():
     form = ArticleForm()
-
+    print(form)
     # 判断表单验证是否通过
     if form.validate_on_submit():
         try:
+            filename = secure_filename(''.join(lazy_pinyin(form.img_url.data.filename)))
+            print(filename)
+            form.img_url.data.save('./static/img/' + filename)
+            print("上传成功！")
             # 获取表单提交的数据
             articles = Article(
-                title = form.title.data,
-                content = form.content.data,
-                types = form.types.data,
-                img_url=form.img_url.data,
+                title=form.title.data,
+                content=form.content.data,
+                types=form.types.data,
+                # img_url=form.img_url.data,
+                img_url=filename,
                 author=form.author.data,
                 is_recommend=form.is_recommend.data,
                 is_valid=form.is_valid.data,
@@ -222,7 +253,7 @@ def article_add():
         except:
             flash("新闻添加失败！", category="error")
 
-    return render_template("admin/article/add.html", form=form)
+    return render_template("/admin/article/add.html", form=form)
 
 
 # 编辑新闻
@@ -238,10 +269,14 @@ def article_edit(pk):
 
     if form.validate_on_submit():
         try:
+            filename = secure_filename(''.join(lazy_pinyin(form.img_url.data.filename)))
+            print(filename)
+            form.img_url.data.save('./static/img/' + filename)
+            print("上传成功！")
             article.title = form.title.data
             article.content = form.content.data
             article.types = form.types.data
-            article.img_url = form.img_url.data
+            article.img_url = filename
             article.author = form.author.data
             article.is_recommend = form.is_recommend.data
             article.is_valid = form.is_valid.data
@@ -273,4 +308,3 @@ def article_delete(pk):
         flash("新闻删除失败！", category="error")
 
     return redirect(url_for('.article_index'))
-
