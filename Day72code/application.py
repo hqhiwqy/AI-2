@@ -1,7 +1,9 @@
 # 定义和创建Flask应用实例
 
-from flask import Flask, render_template
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_script import Manager
+from common.libs.UrlManager import UrlManager
 import os
 
 
@@ -23,29 +25,22 @@ class Application(Flask):
         db.init_app(self)
 
 
-# 实例化数据库
 db = SQLAlchemy()
+
+# os.getcwd() 获取当前脚本所在的目录
+app = Application(__name__,
+                  static_folder=os.getcwd() + '/web/static/',
+                  template_folder=os.getcwd() + '/web/templates/',
+                  root_path=os.getcwd())
+
+
 # db = SQLAlchemy(app)
 
 
-# os.getcwd() 获取当前脚本所在的目录
-app = Application(
-    __name__,
-    static_folder=os.getcwd() + '/web/static/',
-    template_folder=os.getcwd() + '/web/templates/',
-    root_path=os.getcwd()
-)
+manager = Manager(app)
 
 
-@app.route('/ping')
-def ping():
-    return 'pone'
+"""注册函数模板"""
 
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-
-if __name__ == '__main__':
-    app.run()
+app.add_template_global(UrlManager.build_url, 'buildUrl')
+app.add_template_global(UrlManager.build_static_url, 'buildStaticUrl')

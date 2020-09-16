@@ -1,14 +1,23 @@
-#  基础配置文件
 import os
 
 DEBUG = False
 
-SERCER_ROOT = 6000
+SERVER_PORT = 5050
 
-PORKECT_TITLE = "新闻管理系统"
+PROJECT_TITLE = "后台管理系统"
 
-SUPPORT = "郝草草"
+SUPPORT = "hqhiwqy"
 
-SECRET_KEY = os.urandom(24)
+SECRET_KEY = 'this is a random string'
 
 PAGE_SIZE = 10
+
+# 登录后需要忽视的URL
+IGNORE_URLS = [
+    "^/user/login"
+]
+
+# 登录前需要忽视的URL
+IGNORE_CHECK_LOGIN_URLS = [
+    "^/static"
+]
