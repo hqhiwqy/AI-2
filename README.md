@@ -133,3 +133,25 @@ https://github.com/ai-course-team/Day66
 Day67
 Flask进阶（五）
 https://github.com/ai-course-team/Day67
+
+Day68
+Flask实战（一）
+https://github.com/ai-course-team/Day68
+
+Day69
+Flask实战（二）
+https://github.com/ai-course-team/Day69
+
+Day70
+Flask实战（三）
+https://github.com/ai-course-team/Day70
+
+Day71
+Centos7部署Nginx+uWSGI+Flask生产环境
+https://github.com/ai-course-team/Day71
+
+Day72, 73
+打造一个高可用的Flask MVC框架
+https://github.com/ai-course-team/Day72
+https://github.com/ai-course-team/Day73
+
