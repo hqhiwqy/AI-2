@@ -155,3 +155,26 @@ Day72, 73
 https://github.com/ai-course-team/Day72
 https://github.com/ai-course-team/Day73
 
+Day74
+人工智能概述、人工智能数学基础
+https://github.com/ai-course-team/Day74
+
+Day75
+机器学习基础
+https://github.com/ai-course-team/Day75
+
+Day76
+深度学习基础
+https://github.com/ai-course-team/Day76
+
+Day78
+深度学习入门实践-手写数字识别
+https://github.com/ai-course-team/Day78
+
+Day79
+深度学习入门实践-服饰图像分类
+https://github.com/ai-course-team/Day79
+
+Day80
+深度学习进阶实战-验证码识别
+https://github.com/ai-course-team/Day80
